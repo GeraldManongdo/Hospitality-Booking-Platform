@@ -1,0 +1,32 @@
+(() => {
+  const grid = document.getElementById('property-results');
+  if (!grid) return;
+  const cards = [...grid.querySelectorAll('.property-result')];
+  const query = document.getElementById('search-query');
+  const maxPrice = document.getElementById('max-price');
+  const sort = document.getElementById('sort-order');
+  const count = document.getElementById('results-count');
+  const empty = document.getElementById('empty-results');
+  const update = () => {
+    const term = (query?.value || new URLSearchParams(location.search).get('q') || '').trim().toLowerCase();
+    if (query && !query.value && new URLSearchParams(location.search).has('q')) query.value = new URLSearchParams(location.search).get('q');
+    const ceiling = Number(maxPrice?.value || 0);
+    const visible = cards.filter((card) => card.dataset.name.includes(term) && (!ceiling || Number(card.dataset.price) < ceiling));
+    cards.forEach((card) => { card.hidden = !visible.includes(card); });
+    const ordered = [...visible];
+    if (sort?.value === 'price-low') ordered.sort((a,b)=>Number(a.dataset.price)-Number(b.dataset.price));
+    if (sort?.value === 'price-high') ordered.sort((a,b)=>Number(b.dataset.price)-Number(a.dataset.price));
+    if (sort?.value === 'rating') ordered.sort((a,b)=>Number(b.dataset.rating)-Number(a.dataset.rating));
+    ordered.forEach((card)=>grid.append(card));
+    count.textContent = String(visible.length);
+    empty.classList.toggle('d-none', visible.length > 0);
+    grid.classList.toggle('d-none', visible.length === 0);
+  };
+  query?.addEventListener('input', update);
+  maxPrice?.addEventListener('change', update);
+  sort?.addEventListener('change', update);
+  const clear = () => { if (query) query.value = ''; if (maxPrice) maxPrice.value = '0'; if (sort) sort.value = 'recommended'; update(); };
+  document.getElementById('clear-filters')?.addEventListener('click', clear);
+  document.getElementById('empty-clear')?.addEventListener('click', clear);
+  update();
+})();
