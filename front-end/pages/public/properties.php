@@ -9,5 +9,5 @@ $properties = require __DIR__ . '/includes/mock-properties.php';
 <section class="container py-4"><div class="results-toolbar d-flex flex-wrap align-items-center justify-content-between gap-2 mb-4"><span><strong id="results-count"><?= count($properties) ?></strong> sample stays <span class="text-secondary">· Prices shown per night</span></span><button type="button" class="btn btn-sm btn-outline-primary" id="clear-filters">Clear filters</button></div><div class="data-note mb-4"><i class="bi bi-info-circle me-1"></i> Sample listings for interface demonstration only. Availability and prices are not live.</div><div class="row g-4" id="property-results">
 <?php foreach($properties as $property) { require __DIR__ . '/components/property-card.php'; } ?>
 </div><div id="empty-results" class="text-center py-5 d-none"><i class="bi bi-compass fs-1 text-teal"></i><h2 class="h4 mt-3">No stays found just yet</h2><p class="text-secondary">Try a different destination or clear your filters.</p><button class="btn btn-outline-primary" type="button" id="empty-clear">Clear filters</button></div></section></main>
-<script src="assets/js/search.js"></script>
+<script src="../../assets/js/search.js"></script>
 <?php require __DIR__ . '/includes/customer-footer.php'; ?>
