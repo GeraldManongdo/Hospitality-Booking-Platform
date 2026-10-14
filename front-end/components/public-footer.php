@@ -50,7 +50,7 @@
         <div
             class="d-flex flex-column flex-md-row justify-content-between gap-2 small text-white-50"
         >
-            <span>© <?= date('Y') ?> Xyvora · Demo experience</span>
+            <span>© <?= date('Y') ?> Xyvora </span>
             <span>Made for the joy of getting away.</span>
         </div>
     </div>

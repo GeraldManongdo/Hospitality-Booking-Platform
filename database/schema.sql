@@ -71,6 +71,8 @@ CREATE TABLE IF NOT EXISTS properties (
     country VARCHAR(100) NOT NULL,
     property_type VARCHAR(80) NOT NULL,
     description TEXT NOT NULL,
+    latitude DECIMAL(10, 7) NULL,
+    longitude DECIMAL(10, 7) NULL,
     base_nightly_rate DECIMAL(10, 2) NOT NULL,
     currency CHAR(3) NOT NULL DEFAULT 'USD',
     status ENUM('draft', 'in_review', 'published', 'rejected', 'archived') NOT NULL DEFAULT 'draft',

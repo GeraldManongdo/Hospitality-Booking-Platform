@@ -30,6 +30,7 @@ $activeSection = $activeSection ?? '';
 
     <link href="../../assets/css/style.css" rel="stylesheet">
     <link href="../../assets/css/dashboard.css" rel="stylesheet">
+    <?= $extraHead ?? '' ?>
 </head>
 <body class="admin-layout">
     <header class="admin-topbar">
@@ -75,27 +76,5 @@ $activeSection = $activeSection ?? '';
                     Workspace
                 </div>
 
-                <nav class="nav-links" aria-label="Admin navigation">
-                    <a
-                        class="<?= $activeSection === 'dashboard' ? 'active' : '' ?>"
-                        href="dashboard.php"
-                    >
-                        <i class="bi bi-grid-1x2"></i>
-                        Overview
-                    </a>
-
-                    <?php
-                    $adminSections = require __DIR__ . '/sections.php';
-
-                    foreach ($adminSections as $key => $navSection):
-                    ?>
-                        <a
-                            class="<?= $activeSection === $key ? 'active' : '' ?>"
-                            href="manage.php?section=<?= urlencode($key) ?>"
-                        >
-                            <i class="bi bi-<?= htmlspecialchars($navSection['icon']) ?>"></i>
-                            <?= htmlspecialchars($navSection['title']) ?>
-                        </a>
-                    <?php endforeach; ?>
-                </nav>
+                <?php require __DIR__ . '/admin-sidenav.php'; ?>
             </aside>
