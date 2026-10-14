@@ -4,7 +4,7 @@
             <div class="col-lg-5">
                 <a
                     class="brand-mark text-white"
-                    href="index.php"
+                    href="<?= $publicPath ?? '' ?>home.php"
                 >
                     <span class="brand-symbol">
                         <i class="bi bi-compass-fill"></i>
@@ -19,29 +19,28 @@
 
             <div class="col-6 col-lg-2">
                 <h2 class="footer-title">Discover</h2>
-                <a href="destinations.php">Destinations</a>
-                <a href="properties.php">Stays</a>
-                <a href="customer/wishlist.php">Wishlist</a>
+                <a href="<?= $publicPath ?? '' ?>destinations.php">Destinations</a>
+                <a href="<?= $publicPath ?? '' ?>properties.php">Stays</a>
+                <a href="<?= $accountPath ?? '../customer/' ?>wishlist.php">Wishlist</a>
             </div>
 
             <div class="col-6 col-lg-2">
                 <h2 class="footer-title">Your account</h2>
-                <a href="login.php">Sign in</a>
-                <a href="customer/bookings.php">My trips</a>
-                <a href="customer/profile.php">Profile</a>
+                <a href="<?= $publicPath ?? '' ?>login.php">Sign in</a>
+                <a href="<?= $accountPath ?? '../customer/' ?>bookings.php">My trips</a>
+                <a href="<?= $accountPath ?? '../customer/' ?>profile.php">Profile</a>
             </div>
 
             <div class="col-lg-3">
                 <h2 class="footer-title">A little note</h2>
 
                 <p class="small text-white-50">
-                    Xyvora is a frontend demonstration. Search results,
-                    accounts and booking steps use sample data and are not
-                    connected to a booking service.
+                    Xyvora demo listings and reservations are stored in the
+                    local application database.
                 </p>
 
-                <a href="admin/dashboard.php">Admin demo</a>
-                <a href="partner/dashboard.php">Partner demo</a>
+                <a href="<?= $publicPath ?? '' ?>../admin/dashboard.php">Admin</a>
+                <a href="<?= $publicPath ?? '' ?>../partner/dashboard.php">Partner</a>
             </div>
         </div>
 
@@ -58,5 +57,6 @@
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script src="../../assets/js/app.js"></script>
+<?= $extraScripts ?? '' ?>
 </body>
 </html>

@@ -1,6 +1,37 @@
 <?php
 $pageTitle = 'Find your place in the world';
 $activePage = 'home';
+require_once __DIR__ . '/../../../back-end/config/database.php';
+$database = getDatabaseConnection();
+$destinations = $database->query(
+    'SELECT destinations.id,destinations.name,destinations.country,
+            COALESCE(destinations.image_url,
+                (SELECT property_images.image_url FROM properties
+                 INNER JOIN property_images ON property_images.property_id=properties.id
+                 WHERE properties.destination_id=destinations.id
+                 ORDER BY property_images.is_primary DESC,property_images.sort_order LIMIT 1)) AS image_url,
+            (SELECT COUNT(DISTINCT properties.id) FROM properties
+             INNER JOIN room_types ON room_types.property_id=properties.id AND room_types.status=\'active\'
+             WHERE properties.destination_id=destinations.id AND properties.status=\'published\') AS stay_count
+     FROM destinations WHERE destinations.status=\'published\'
+     ORDER BY stay_count DESC,destinations.name LIMIT 4'
+)->fetchAll();
+$properties = $database->query(
+    'SELECT properties.id,properties.name,properties.city,properties.country,properties.property_type,
+            properties.description,properties.base_nightly_rate,properties.currency,
+            destinations.name AS destination_name,
+            (SELECT property_images.image_url FROM property_images
+             WHERE property_images.property_id=properties.id
+             ORDER BY property_images.is_primary DESC,property_images.sort_order LIMIT 1) AS image_url,
+            (SELECT AVG(reviews.rating) FROM reviews
+             WHERE reviews.property_id=properties.id AND reviews.status=\'published\') AS rating,
+            (SELECT COUNT(*) FROM reviews
+             WHERE reviews.property_id=properties.id AND reviews.status=\'published\') AS review_count
+     FROM properties INNER JOIN destinations ON destinations.id=properties.destination_id
+     WHERE properties.status=\'published\' AND destinations.status=\'published\'
+       AND EXISTS (SELECT 1 FROM room_types WHERE room_types.property_id=properties.id AND room_types.status=\'active\')
+     ORDER BY properties.created_at DESC LIMIT 3'
+)->fetchAll();
 require __DIR__ . '/../../components/public-header.php';
 ?>
 <main>
@@ -41,15 +72,9 @@ require __DIR__ . '/../../components/public-header.php';
     <div class="container">
       <div class="section-heading"><div><span class="eyebrow">GO SOMEWHERE GOOD</span><h2 class="h2 fw-bold mt-2">Places to fall for</h2></div><a class="text-link" href="destinations.php">Explore destinations <i class="bi bi-arrow-right"></i></a></div>
       <div class="row g-4">
-        <?php
-        $destinations = [
-          ['Lisbon', 'Portugal', 'photo-1555881400-74d7acaacd8b', '2,140 stays'],
-          ['Kyoto', 'Japan', 'photo-1493976040374-85c8e12f0c0e', '1,860 stays'],
-          ['Amalfi Coast', 'Italy', 'photo-1533587851505-d119e13fa0d7', '960 stays'],
-          ['Bali', 'Indonesia', 'photo-1537996194471-e657df975ab4', '1,320 stays'],
-        ];
-        foreach ($destinations as $destination): ?>
-          <div class="col-6 col-lg-3"><a class="destination-card" href="properties.php?q=<?= urlencode($destination[0]) ?>"><img src="https://images.unsplash.com/<?= htmlspecialchars($destination[2]) ?>?auto=format&fit=crop&w=700&q=80" alt="<?= htmlspecialchars($destination[0]) ?>"><span class="destination-overlay"><strong><?= htmlspecialchars($destination[0]) ?></strong><small><?= htmlspecialchars($destination[1]) ?> · <?= htmlspecialchars($destination[3]) ?></small></span></a></div>
+        <?php foreach ($destinations as $destination): ?>
+          <?php $imageUrl = $destination['image_url'] ?: 'https://images.unsplash.com/photo-1516483638261-f4dbaf036963?auto=format&fit=crop&w=700&q=80'; ?>
+          <div class="col-6 col-lg-3"><a class="destination-card" href="properties.php?destination_id=<?= (int) $destination['id'] ?>"><img src="<?= htmlspecialchars($imageUrl, ENT_QUOTES, 'UTF-8') ?>" alt="<?= htmlspecialchars($destination['name'], ENT_QUOTES, 'UTF-8') ?>"><span class="destination-overlay"><strong><?= htmlspecialchars($destination['name'], ENT_QUOTES, 'UTF-8') ?></strong><small><?= htmlspecialchars($destination['country'], ENT_QUOTES, 'UTF-8') ?> · <?= (int) $destination['stay_count'] ?> stays</small></span></a></div>
         <?php endforeach; ?>
       </div>
     </div>
@@ -58,10 +83,7 @@ require __DIR__ . '/../../components/public-header.php';
     <div class="container">
       <div class="section-heading"><div><span class="eyebrow">A FEW GOOD FINDS</span><h2 class="h2 fw-bold mt-2">Stays worth the trip</h2></div><a class="text-link" href="properties.php">See all stays <i class="bi bi-arrow-right"></i></a></div>
       <div class="row g-4">
-        <?php
-        $properties = require __DIR__ . '/includes/mock-properties.php';
-        foreach (array_slice($properties, 0, 3) as $property) { require __DIR__ . '/components/property-card.php'; }
-        ?>
+        <?php foreach ($properties as $property) { require __DIR__ . '/../../components/property-card.php'; } ?>
       </div>
     </div>
   </section>

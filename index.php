@@ -1,9 +1,9 @@
 <?php
 if (!isset($_GET['admin']) || $_GET['admin'] !== 'true') {
-    header("Location: /Hospitality-Booking-Platform/front-end/pages/public/home.php"); 
+    header('Location: front-end/pages/public/home.php', true, 303);
     exit();
 }else {
-    header("Location: /Hospitality-Booking-Platform/front-end/pages/public/login.php"); 
+    header('Location: front-end/pages/public/login.php', true, 303);
     exit();
 }
 ?>

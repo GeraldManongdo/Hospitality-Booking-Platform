@@ -5,11 +5,16 @@ if (session_status() !== PHP_SESSION_ACTIVE) {
 
 $pageTitle = $pageTitle ?? 'Xyvora';
 $activePage = $activePage ?? '';
-$basePath = $basePath ?? '';
+$publicPath = $publicPath ?? '';
+$accountPath = $accountPath ?? '../customer/';
 $signedInUser = $_SESSION['user'] ?? null;
+$wishlistControllerPath = $wishlistControllerPath ?? '../../../back-end/controllers/wishlist.php';
 
 if ($signedInUser && empty($_SESSION['logout_csrf_token'])) {
     $_SESSION['logout_csrf_token'] = bin2hex(random_bytes(32));
+}
+if ($signedInUser && empty($_SESSION['wishlist_csrf_token'])) {
+    $_SESSION['wishlist_csrf_token'] = bin2hex(random_bytes(32));
 }
 ?>
 
@@ -33,12 +38,20 @@ if ($signedInUser && empty($_SESSION['logout_csrf_token'])) {
     <link href="../../assets/css/customer.css" rel="stylesheet" >
 
     <link href="../../assets/css/dashboard.css" rel="stylesheet" >
+    <?= $extraHead ?? '' ?>
 </head>
 <body>
+    <script>
+        window.XyvoraWishlist = <?= json_encode([
+            'authenticated' => (bool) $signedInUser,
+            'endpoint' => $wishlistControllerPath,
+            'csrfToken' => $signedInUser ? $_SESSION['wishlist_csrf_token'] : null,
+        ], JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT) ?>;
+    </script>
     <header class="site-header">
         <nav class="navbar navbar-expand-lg py-3">
             <div class="container">
-                <a class="navbar-brand brand-mark" href="<?= $basePath ?>index.php" >
+                <a class="navbar-brand brand-mark" href="<?= $publicPath ?>home.php" >
                     <span class="brand-symbol">
                         <i class="bi bi-compass-fill"></i>
                     </span> xyvora<span class="brand-period">.</span>
@@ -50,17 +63,17 @@ if ($signedInUser && empty($_SESSION['logout_csrf_token'])) {
 
                 <div class="collapse navbar-collapse" id="mainNav">
                     <div class="navbar-nav mx-auto gap-lg-3">
-                        <a class="nav-link <?= $activePage === 'home' ? 'active' : '' ?>" href="home.php"  > Home </a>
+                        <a class="nav-link <?= $activePage === 'home' ? 'active' : '' ?>" href="<?= $publicPath ?>home.php"  > Home </a>
 
-                        <a class="nav-link <?= $activePage === 'destinations' ? 'active' : '' ?>" href="destinations.php" > Destinations </a>
+                        <a class="nav-link <?= $activePage === 'destinations' ? 'active' : '' ?>" href="<?= $publicPath ?>destinations.php" > Destinations </a>
 
-                        <a class="nav-link <?= $activePage === 'properties' ? 'active' : '' ?>" href="properties.php"  >  Find a stay </a>
+                        <a class="nav-link <?= $activePage === 'properties' ? 'active' : '' ?>" href="<?= $publicPath ?>properties.php"  >  Find a stay </a>
 
-                        <a class="nav-link" href="customer/bookings.php"  > My trips </a>
+                        <a class="nav-link" href="<?= $accountPath ?>bookings.php"  > My trips </a>
                     </div>
 
                     <div class="d-flex align-items-center gap-2 mt-3 mt-lg-0">
-                        <a class="btn btn-link text-decoration-none text-dark" href="../customer/wishlist.php" >
+                        <a class="btn btn-link text-decoration-none text-dark" href="<?= $accountPath ?>wishlist.php" >
                             <i class="bi bi-heart me-1"></i>
                             <span class="d-lg-none">Wishlist</span>
                         </a>
@@ -82,7 +95,7 @@ if ($signedInUser && empty($_SESSION['logout_csrf_token'])) {
 
                                 <ul class="dropdown-menu dropdown-menu-end">
                                     <li>
-                                        <a class="dropdown-item" href="../customer/profile.php">
+                                        <a class="dropdown-item" href="<?= $accountPath ?>profile.php">
                                             <i class="bi bi-person me-2"></i>Profile
                                         </a>
                                     </li>
@@ -106,9 +119,9 @@ if ($signedInUser && empty($_SESSION['logout_csrf_token'])) {
                                 </ul>
                             </div>
                         <?php else: ?>
-                            <a class="btn btn-outline-primary" href="login.php">Sign in</a>
+                            <a class="btn btn-outline-primary" href="<?= $publicPath ?>login.php">Sign in</a>
 
-                            <a class="btn btn-primary" href="register.php">Join Xyvora</a>
+                            <a class="btn btn-primary" href="<?= $publicPath ?>register.php">Join Xyvora</a>
                         <?php endif; ?>
                     </div>
                 </div>

@@ -77,6 +77,13 @@ $_SESSION['user'] = [
     'role' => $user['role'],
 ];
 
+$bookingRoomId = filter_var($_SESSION['booking_room_after_login'] ?? null, FILTER_VALIDATE_INT);
+if ($bookingRoomId && $bookingRoomId > 0) {
+    unset($_SESSION['booking_room_after_login']);
+    header('Location: ../../front-end/pages/public/booking.php?room_type_id=' . $bookingRoomId, true, 303);
+    exit;
+}
+
 $destination = $user['role'] === 'admin'
     ? '../../front-end/pages/admin/dashboard.php'
     : '../../front-end/pages/public/home.php';

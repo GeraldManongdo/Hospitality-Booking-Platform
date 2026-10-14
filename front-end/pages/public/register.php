@@ -134,7 +134,7 @@ require __DIR__ . "/../../components/public-header.php";
                                 name="phone"
                                 type="tel"
                                 class="form-control"
-                                pattern="[0-9+ .()\-]{7,32}"
+                                pattern="[0-9+ .\-]{7,32}"
                                 maxlength="32"
                                 autocomplete="tel"
                                 value="<?= $escape($registrationValues['phone'] ?? '') ?>"

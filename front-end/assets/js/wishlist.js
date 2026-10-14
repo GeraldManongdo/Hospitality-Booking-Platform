@@ -1,15 +1,17 @@
 (() => {
   const grid=document.getElementById('wishlist-grid'),empty=document.getElementById('wishlist-empty');
   if(!grid)return;
+  if(window.XyvoraWishlist?.authenticated)return;
   const update=()=>{
     let saved=[];
     try{saved=JSON.parse(localStorage.getItem('xyvora-wishlist')||'[]');}
     catch(error){console.error('Unable to load saved demo stays.',error);}
+    if(!Array.isArray(saved))saved=[];
     let visible=0;
     grid.querySelectorAll('[data-wishlist]').forEach((button)=>{
       const card=button.closest('.property-result');
       if(!card)return;
-      card.hidden=!saved.includes(button.dataset.wishlist);
+      card.hidden=!saved.map(String).includes(button.dataset.wishlist);
       if(!card.hidden)visible+=1;
     });
     empty.classList.toggle('d-none',visible>0);

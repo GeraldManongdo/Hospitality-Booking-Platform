@@ -72,7 +72,7 @@ $escape = static fn (string $value): string => htmlspecialchars($value, ENT_QUOT
             </div>
             <div class="col-md-6">
                 <label class="form-label fw-semibold" for="phone">Phone number</label>
-                <input class="form-control" id="phone" name="phone" type="tel" maxlength="32" pattern="[0-9+ .()\-]*" value="<?= $escape($user['phone'] ?? '') ?>">
+                <input class="form-control" id="phone" name="phone" type="tel" maxlength="32" pattern="[0-9+ .\-]*" value="<?= $escape($user['phone'] ?? '') ?>">
             </div>
             <div class="col-md-6">
                 <label class="form-label fw-semibold" for="role">Role</label>
