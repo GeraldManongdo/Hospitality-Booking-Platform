@@ -59,6 +59,16 @@ if (
 }
 
 require __DIR__ . '/../config/database.php';
+require_once __DIR__ . '/../config/paymongo.php';
+try {
+    paymongoConfiguration();
+} catch (RuntimeException $exception) {
+    $redirectWithFeedback(
+        'QR PH payments are not configured yet. Please contact the site administrator.',
+        $roomId
+    );
+}
+
 try {
     $database = getDatabaseConnection();
     $database->beginTransaction();
@@ -75,6 +85,9 @@ try {
     $room = $roomQuery->fetch();
     if (!$room || $room['property_status'] !== 'published' || $room['destination_status'] !== 'published') {
         throw new RuntimeException('This room is no longer available to book.');
+    }
+    if (strtoupper((string) $room['currency']) !== 'PHP') {
+        throw new RuntimeException('QR PH payments are available only for bookings priced in PHP.');
     }
     if ($guestCount > (int) $room['max_guests'] * $roomCount || $roomCount > (int) $room['total_units']) {
         throw new RuntimeException('The selected number of guests or rooms exceeds this room type’s capacity.');
@@ -130,6 +143,7 @@ try {
     $subtotal = round($subtotal, 2);
     $averageNightlyRate = round($subtotal / ($nightCount * $roomCount), 2);
     $reference = 'XYV-' . strtoupper(bin2hex(random_bytes(6)));
+    $paymentReference = 'XYV-PAY-' . strtoupper(bin2hex(random_bytes(8)));
     $insert = $database->prepare(
         'INSERT INTO bookings
             (reference,guest_user_id,property_id,room_type_id,guest_first_name,guest_last_name,
@@ -160,12 +174,63 @@ try {
         'special_requests' => $specialRequests !== '' ? $specialRequests : null,
     ]);
     $bookingId = (int) $database->lastInsertId();
+    $paymentInsert = $database->prepare(
+        'INSERT INTO payments
+            (booking_id,reference,payment_type,provider,amount,currency,status)
+         VALUES (:booking_id,:reference,\'charge\',\'PayMongo QRPH\',:amount,:currency,\'pending\')'
+    );
+    $paymentInsert->execute([
+        'booking_id' => $bookingId,
+        'reference' => $paymentReference,
+        'amount' => $subtotal,
+        'currency' => $room['currency'],
+    ]);
+    $paymentId = (int) $database->lastInsertId();
     $database->commit();
 
     unset($_SESSION['booking_csrf_token']);
     $_SESSION['last_booking_id'] = $bookingId;
     $_SESSION['last_booking_reference'] = $reference;
-    header('Location: ../../front-end/pages/public/booking-confirmation.php', true, 303);
+    try {
+        $checkout = paymongoCreateCheckoutSession(
+            $bookingId,
+            $reference,
+            (string) $room['name'] . ' reservation ' . $reference,
+            (int) round($subtotal * 100),
+            (string) $room['currency']
+        );
+    } catch (RuntimeException $exception) {
+        error_log('Could not create PayMongo checkout session: ' . $exception->getMessage());
+        $database->beginTransaction();
+        $failedPayment = $database->prepare(
+            'UPDATE payments SET status=\'failed\',processed_at=NOW() WHERE id=:id AND status=\'pending\''
+        );
+        $failedPayment->execute(['id' => $paymentId]);
+        $cancelBooking = $database->prepare(
+            'UPDATE bookings SET status=\'cancelled\' WHERE id=:id AND status=\'pending\''
+        );
+        $cancelBooking->execute(['id' => $bookingId]);
+        $database->commit();
+        $redirectWithFeedback(
+            'We could not start your QR PH payment. Your reservation was not placed; please try again.',
+            $roomId
+        );
+    }
+
+    try {
+        $saveCheckout = $database->prepare(
+            'UPDATE payments SET provider_transaction_id=:session_id,provider_checkout_url=:checkout_url
+             WHERE id=:id AND status=\'pending\''
+        );
+        $saveCheckout->execute([
+            'session_id' => $checkout['id'],
+            'checkout_url' => $checkout['checkout_url'],
+            'id' => $paymentId,
+        ]);
+    } catch (PDOException $exception) {
+        error_log('Could not save PayMongo checkout details: ' . $exception->getMessage());
+    }
+    header('Location: ' . $checkout['checkout_url'], true, 303);
     exit;
 } catch (RuntimeException $exception) {
     if (isset($database) && $database->inTransaction()) {

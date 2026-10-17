@@ -14,3 +14,16 @@
     <a class="<?= $activeSection === 'rooms' ? 'active' : '' ?>" href="manage-rooms.php"><i class="bi bi-door-open"></i>Rooms</a>
     <a class="<?= $activeSection === 'bookings' ? 'active' : '' ?>" href="manage-bookings.php"><i class="bi bi-calendar-check"></i>Bookings</a>
 </nav>
+<div class="admin-sidebar-footer">
+    <form action="../../../back-end/controllers/logout.php" method="post">
+        <input
+            type="hidden"
+            name="csrf_token"
+            value="<?= htmlspecialchars($_SESSION['logout_csrf_token'], ENT_QUOTES, 'UTF-8') ?>"
+        >
+        <button class="admin-logout-button" type="submit">
+            <i class="bi bi-box-arrow-right"></i>
+            <span>Log out</span>
+        </button>
+    </form>
+</div>

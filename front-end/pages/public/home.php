@@ -22,11 +22,7 @@ $properties = $database->query(
             destinations.name AS destination_name,
             (SELECT property_images.image_url FROM property_images
              WHERE property_images.property_id=properties.id
-             ORDER BY property_images.is_primary DESC,property_images.sort_order LIMIT 1) AS image_url,
-            (SELECT AVG(reviews.rating) FROM reviews
-             WHERE reviews.property_id=properties.id AND reviews.status=\'published\') AS rating,
-            (SELECT COUNT(*) FROM reviews
-             WHERE reviews.property_id=properties.id AND reviews.status=\'published\') AS review_count
+             ORDER BY property_images.is_primary DESC,property_images.sort_order LIMIT 1) AS image_url
      FROM properties INNER JOIN destinations ON destinations.id=properties.destination_id
      WHERE properties.status=\'published\' AND destinations.status=\'published\'
        AND EXISTS (SELECT 1 FROM room_types WHERE room_types.property_id=properties.id AND room_types.status=\'active\')

@@ -16,7 +16,6 @@
     const ordered = [...visible];
     if (sort?.value === 'price-low') ordered.sort((a,b)=>Number(a.dataset.price)-Number(b.dataset.price));
     if (sort?.value === 'price-high') ordered.sort((a,b)=>Number(b.dataset.price)-Number(a.dataset.price));
-    if (sort?.value === 'rating') ordered.sort((a,b)=>Number(b.dataset.rating)-Number(a.dataset.rating));
     ordered.forEach((card)=>grid.append(card));
     count.textContent = String(visible.length);
     empty.classList.toggle('d-none', visible.length > 0);

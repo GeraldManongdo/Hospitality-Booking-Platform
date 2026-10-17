@@ -1,6 +1,10 @@
 <?php
 $pageTitle = $pageTitle ?? 'Admin dashboard';
 $activeSection = $activeSection ?? '';
+$adminName = trim((string) ($_SESSION['user']['first_name'] ?? 'Administrator'));
+if (empty($_SESSION['logout_csrf_token'])) {
+    $_SESSION['logout_csrf_token'] = bin2hex(random_bytes(32));
+}
 ?>
 
 <!doctype html>
@@ -9,7 +13,7 @@ $activeSection = $activeSection ?? '';
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
-    <title><?= htmlspecialchars($pageTitle) ?> · Xyvora Admin Demo</title>
+    <title><?= htmlspecialchars($pageTitle, ENT_QUOTES, 'UTF-8') ?> · Xyvora Admin</title>
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
 
@@ -49,16 +53,13 @@ $activeSection = $activeSection ?? '';
 
             <div class="d-flex align-items-center gap-3">
                 <span class="small text-secondary d-none d-sm-inline">
-                    <i
-                        class="bi bi-circle-fill text-warning me-1"
-                        style="font-size: 0.5rem"
-                    ></i>
-                    Demo workspace
+                    <i class="bi bi-person-circle me-1"></i>
+                    <?= htmlspecialchars($adminName, ENT_QUOTES, 'UTF-8') ?>
                 </span>
 
                 <a
                     class="btn btn-sm btn-outline-primary"
-                    href="../index.php"
+                    href="../public/home.php"
                 >
                     <i class="bi bi-box-arrow-up-right me-1"></i>
                     View site
